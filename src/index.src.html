@@ -37,6 +37,7 @@ p{margin:0 0 1em;max-width:58ch}
 #hud .cl.on{opacity:1}
 .no3d #hud{display:none}
 .no3d #scene{display:none}
+.s3d{display:none}
 section,footer{position:relative}
 .wrap{position:relative;z-index:2;max-width:1240px;margin:0 auto;padding:0 max(5vw,16px)}
 
@@ -321,12 +322,15 @@ footer b{color:var(--y);font-stretch:125%;font-weight:900}
   .hero .wrap{row-gap:24px}
   .scene{min-height:auto;padding:0 0 56px;align-items:start}
   /* telefono: la ruota 3D vive solo nella prima schermata e scorre via con lei */
-  :root{--wh:min(50svh,90vw)}
-  #scene{position:absolute;top:58px;left:0;right:0;bottom:auto;height:var(--wh)}
-  .scene{padding-top:64px}
+  /* telefono: ogni sezione ha il suo riquadro per la ruota, che scorre con la sezione */
+  :root{--wh:min(46svh,86vw)}
+  .s3d{display:block;position:relative;height:var(--wh);margin:0 calc(-1 * max(5vw,16px)) 6px}
+  .s3d #scene{position:absolute;inset:0;width:100%;height:100%}
+  .no3d .s3d{display:none}
+  .scene{padding-top:70px}
   .scene::before{content:none}
-  .hero::before{content:"";display:block;height:calc(var(--wh) + 58px)}
-  .no3d .hero::before{height:88px}
+  .hero{padding-top:66px}
+  .no3d .hero{padding-top:96px}
   .navbar,.quick{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
   .navbar{background:rgba(255,255,255,.96)}
   .quick{background:rgba(17,17,17,.96)!important}
@@ -402,6 +406,7 @@ footer b{color:var(--y);font-stretch:125%;font-weight:900}
     </g>
   </svg>
   <div class="wrap">
+    <div class="s3d" data-scene="hero" aria-hidden="true"></div>
     <div class="copy">
       <h1><span>PRONTO</span><span>GOMME</span></h1>
       <p class="sign">CONVERGENZA ed EQUILIBRATURA</p>
@@ -422,6 +427,7 @@ footer b{color:var(--y);font-stretch:125%;font-weight:900}
 
 <section class="scene w" id="gomme" data-side="right" data-ghost="R16">
   <div class="wrap">
+    <div class="s3d" data-scene="gomme" aria-hidden="true"></div>
     <div class="copy">
       <h2>Gomme nuove per la tua auto</h2>
       <p class="lead">Ti troviamo la misura giusta al prezzo giusto, te le montiamo e le equilibriamo sul posto.</p>
@@ -448,6 +454,7 @@ footer b{color:var(--y);font-stretch:125%;font-weight:900}
 
 <section class="scene y" id="usura" data-side="left" data-ghost="1,6">
   <div class="wrap">
+    <div class="s3d" data-scene="usura" aria-hidden="true"></div>
     <div class="copy">
       <h2>Quando vanno cambiate?</h2>
       <p class="lead">Una gomma nuova ha circa 8 mm di battistrada. Per legge non si può scendere sotto 1,6 mm, ma già sotto i 3 mm sul bagnato frena peggio.</p>
@@ -474,6 +481,7 @@ footer b{color:var(--y);font-stretch:125%;font-weight:900}
 
 <section class="scene w" id="cerchi" data-side="right" data-ghost="R19">
   <div class="wrap">
+    <div class="s3d" data-scene="cerchi" aria-hidden="true"></div>
     <div class="copy">
       <h2>Cerchi nuovi e usati rimessi a nuovo</h2>
       <p class="lead">Cerchi in lega nuovi, anche GMP, e cerchi usati ricondizionati in ottimo stato. Scegli il cerchio, noi montiamo le gomme, equilibriamo e ti diamo la ruota pronta.</p>
@@ -504,6 +512,7 @@ footer b{color:var(--y);font-stretch:125%;font-weight:900}
 
 <section class="scene k" id="equilibratura" data-side="left" data-ghost="0 g">
   <div class="wrap">
+    <div class="s3d" data-scene="equil" aria-hidden="true"></div>
     <div class="copy">
       <h2>Il volante vibra? È l'equilibratura</h2>
       <p class="lead">Nessuna ruota pesa uguale in ogni punto. In velocità bastano pochi grammi di differenza per far tremare volante e sedili.</p>
@@ -528,6 +537,7 @@ footer b{color:var(--y);font-stretch:125%;font-weight:900}
 
 <section class="scene k" id="convergenza" data-side="right" data-ghost="0,0°">
   <div class="wrap">
+    <div class="s3d" data-scene="conv" aria-hidden="true"></div>
     <div class="copy">
       <h2>La macchina tira da una parte?</h2>
       <p class="lead">Se le ruote non sono dritte, l'auto tira, il volante resta storto e le gomme si consumano su un lato solo. Con la convergenza le rimettiamo in linea.</p>

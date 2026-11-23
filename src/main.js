@@ -191,6 +191,9 @@ const SCENES = {
 };
 const order = ['hero', 'gomme', 'usura', 'cerchi', 'vetrina', 'equil', 'conv', 'servizi'];
 const state = { ...SCENES.hero, intro: reduce ? 0 : 1 };
+// telefono: posa della ruota nel riquadro della sezione visibile
+const mstate = { ...SCENES.hero, intro: reduce ? 0 : 1 };
+let mStage = null;
 const inner = { wear: 0, bal: 0, toe: 0, wearUser: null };
 
 order.forEach((id, i) => {
@@ -356,8 +359,35 @@ async function start3D(forceWebGL = false) {
 
   let vw = 1, vh = 1, mobile = false, onScreen = true;
   new IntersectionObserver(es => { onScreen = es[0].isIntersecting; }).observe(canvas);
+  const stages = $$('.s3d');
+  function placeCanvas() {
+    if (innerWidth < 900) {
+      const target = mStage || stages[0];
+      if (target && canvas.parentElement !== target) target.appendChild(canvas);
+    } else if (canvas.parentElement !== document.body) {
+      document.body.prepend(canvas);
+    }
+  }
+  function switchStage(el) {
+    if (el === mStage) return;
+    mStage = el;
+    resize();
+    Object.assign(mstate, SCENES[el.dataset.scene], { intro: mstate.intro });
+    if (revealed && !reduce) { mstate.intro = 1; gsap.to(mstate, { intro: 0, duration: 0.95, ease: 'power3.out', overwrite: true }); }
+    prevX = null;
+  }
+  const vis = new Map();
+  const io = new IntersectionObserver(es => {
+    es.forEach(e => vis.set(e.target, e.isIntersecting ? e.intersectionRatio : 0));
+    if (innerWidth >= 900) return;
+    let best = null, br = 0;
+    vis.forEach((r, el) => { if (r > br) { br = r; best = el; } });
+    if (best) switchStage(best);
+  }, { threshold: [0, 0.15, 0.4, 0.7, 1] });
+  stages.forEach(el => io.observe(el));
   function resize() {
-    vw = canvas.clientWidth || innerWidth; vh = canvas.clientHeight || innerHeight; mobile = vw < 900;
+    placeCanvas();
+    vw = canvas.clientWidth || innerWidth; vh = canvas.clientHeight || innerHeight; mobile = innerWidth < 900;
     renderer.setPixelRatio(Math.min(devicePixelRatio, mobile ? 1.35 : 2));
     renderer.setSize(vw, vh, false);
     camera.aspect = vw / vh;
@@ -393,15 +423,21 @@ async function start3D(forceWebGL = false) {
 
     mouse.sx += (mouse.x - mouse.sx) * 0.05; mouse.sy += (mouse.y - mouse.sy) * 0.05;
 
-    let x, y, s;
-    const off = Math.abs(state.x) > 1;
-    if (mobile) {
-      x = 0; y = -H * 0.02;
-      s = Math.min(HW, H) * 0.86 * (state.s / SCENES.hero.s) ** 0.5;
-    } else {
-      x = state.x * HW; y = state.y * H; s = state.s * Math.min(1, H * 0.62);
+    const st = mobile ? mstate : state;
+    let mp = 0;
+    if (mobile && mStage) {
+      const r = mStage.getBoundingClientRect();
+      mp = Math.min(1, Math.max(0, (1 - (r.top + r.height * 0.5) / innerHeight) * 1.7));
     }
-    x -= state.intro * HW * 1.9;
+    const P = mobile ? { wear: mp, bal: mp, toe: mp } : inner;
+    let x, y, s;
+    if (mobile) {
+      x = 0; y = -H * 0.03;
+      s = Math.min(HW, H) * 0.84 * Math.min(1.15, (st.s / SCENES.hero.s) ** 0.5);
+    } else {
+      x = st.x * HW; y = st.y * H; s = st.s * Math.min(1, H * 0.62);
+    }
+    x -= st.intro * HW * (mobile ? 2.3 : 1.9);
     const hidden = !onScreen || (!mobile && Math.abs(x) - s * 1.2 > HW);
     if (hidden && wasHidden) { prevX = x; return; }
     wasHidden = hidden;
@@ -409,18 +445,18 @@ async function start3D(forceWebGL = false) {
     // rotolamento: la ruota gira davvero quando si sposta, più la velocità dello scroll
     if (prevX !== null) spin -= (x - prevX) / (s * 1.04);
     prevX = x;
-    const balMix = state.balMix;
-    if (!reduce) spin += dt * (0.25 * (1 - balMix) + 16 * balMix * (1 - inner.bal * 0.35)) + scrollVel * 0.0025 * (1 - balMix);
+    const balMix = st.balMix;
+    if (!reduce) spin += dt * (0.25 * (1 - balMix) + 16 * balMix * (1 - P.bal * 0.35)) + scrollVel * 0.0025 * (1 - balMix);
 
-    const wear = inner.wearUser !== null ? inner.wearUser : inner.wear;
-    const wearEff = state.wearMix * wear;
+    const wear = inner.wearUser !== null ? inner.wearUser : P.wear;
+    const wearEff = st.wearMix * wear;
     if (Math.abs(wearEff - lastWear) > 0.004) { W.setWear(1 - wearEff * 0.8); lastWear = wearEff; }
 
-    const wob = reduce ? 0 : balMix * (1 - inner.bal);
-    const toeAmt = state.toeMix * 0.2 * (1 - inner.toe);
+    const wob = reduce ? 0 : balMix * (1 - P.bal);
+    const toeAmt = st.toeMix * 0.2 * (1 - P.toe);
 
-    const yaw = state.yaw + mouse.sx * 0.22 * (1 - state.toeMix) + toeAmt;
-    const pitch = state.pitch + mouse.sy * 0.12;
+    const yaw = st.yaw + mouse.sx * 0.22 * (1 - st.toeMix) + toeAmt;
+    const pitch = st.pitch + mouse.sy * 0.12;
     qx.setFromAxisAngle(X, pitch); qy.setFromAxisAngle(Y, yaw); qz.setFromAxisAngle(Z, HP);
     W.pivot.quaternion.copy(qx).multiply(qy).multiply(qz);
     W.pivot.position.set(x, y + Math.sin(now / 900) * 0.025 * (1 - balMix), 0);
@@ -430,21 +466,21 @@ async function start3D(forceWebGL = false) {
     W.spinner.position.set(Math.cos(spin) * 0.035 * wob, 0, Math.sin(spin) * 0.035 * wob);
     W.pivot.rotation.z += Math.sin(spin) * 0.03 * wob;
 
-    W.tyre.position.y = -state.explode * 0.95;
-    W.rim.position.y = state.explode * 0.32;
-    W.rim.rotation.y = state.explode * 0.4;
-    W.caliper.visible = state.explode < 0.5;
-    W.weights.scale.setScalar(Math.max(0.001, balMix * inner.bal));
+    W.tyre.position.y = -st.explode * 0.95;
+    W.rim.position.y = st.explode * 0.32;
+    W.rim.rotation.y = st.explode * 0.4;
+    W.caliper.visible = st.explode < 0.5;
+    W.weights.scale.setScalar(Math.max(0.001, balMix * P.bal));
 
-    laser.visible = ref.visible = state.laser > 0.02;
-    laser.scale.set(1, state.laser, state.laser);
+    laser.visible = ref.visible = st.laser > 0.02;
+    laser.scale.set(1, st.laser, st.laser);
     align.value = Math.max(0, 1 - toeAmt / 0.03);
-    qy.setFromAxisAngle(Y, state.yaw);
+    qy.setFromAxisAngle(Y, st.yaw);
     refPivot.quaternion.copy(qx).multiply(qy).multiply(qz);
     refPivot.position.copy(W.pivot.position);
-    refPivot.scale.setScalar(s * state.laser);
+    refPivot.scale.setScalar(s * st.laser);
 
-    const sh = Math.max(0, 1 - state.laser) * (1 - state.balMix * 0.6) * (1 - state.wearMix);
+    const sh = Math.max(0, 1 - st.laser) * (1 - st.balMix * 0.6) * (1 - st.wearMix);
     shadow.visible = sh > 0.02;
     shadow.material.opacity = sh * 0.9;
     shadow.position.set(x, y - s * 1.06, -0.4);
@@ -479,8 +515,8 @@ const pre = reduce || seen || !intro ? null : gsap.to(mano, { p: 0.45, duration:
 let revealed = false;
 function startShow() {
   document.documentElement.classList.add('go');
-  if (reduce) { state.intro = 0; return; }
-  gsap.to(state, { intro: 0, duration: 1.3, ease: 'power3.out' });
+  if (reduce) { state.intro = 0; mstate.intro = 0; return; }
+  gsap.to([state, mstate], { intro: 0, duration: 1.3, ease: 'power3.out' });
   if (seen) return;
   gsap.to('.hero .copy > *', { y: 0, opacity: 1, duration: 0.7, stagger: 0.05, ease: 'power3.out', clearProps: 'transform,opacity' });
   gsap.to('.strip > *', { y: 0, opacity: 1, duration: 0.6, stagger: 0.05, delay: 0.2, ease: 'power3.out', clearProps: 'transform,opacity' });
