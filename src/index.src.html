@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pronto Gomme Palermo</title>
+<meta name="description" content="Pronto Gomme, gommista a Palermo in Via Messina Marine 707/709: vendita gomme e cerchi, montaggio, equilibratura, convergenza e riparazione forature. Tel. 327 010 7728.">
+<style>
+@font-face{font-family:Archivo;font-style:normal;font-display:swap;font-weight:100 900;font-stretch:62% 125%;src:url(%%FONT%%) format('woff2')}
+/* VOICE  occasione: un'officina vera, diretta, senza fronzoli
+   IDEA   l'insegna gialla di Pronto Gomme e il fianco di una gomma: lettere larghe e nere, segni di battistrada
+   PICTURE una ruota 3D fatta col codice che rotola con lo scroll e mostra ogni servizio (usura, cerchio, equilibratura, convergenza)
+   COLOUR giallo insegna #ffcf1b dominante, nero #111, bianco; rosso furgone #e3241b solo per avvisi e pinza
+   TYPE   Archivo extra-largo 900 per i titoli, Archivo normale per il testo
+   LAYOUT computer: testo su un lato, ruota sull'altro, i lati si alternano; telefono: ruota in alto, testo sotto */
+:root{--y:#ffcf1b;--k:#111;--w:#fff;--r:#e3241b;--g:#6b6b6b;color-scheme:light}
+*{box-sizing:border-box;min-width:0}
+html{scroll-padding-top:90px}
+html.lenis,html.lenis body{height:auto}
+.lenis.lenis-smooth{scroll-behavior:auto!important}
+body{margin:0;background:var(--y);color:var(--k);font:17px/1.55 Archivo,"Helvetica Neue",Arial,sans-serif;font-stretch:100%;overflow-x:clip}
+img{max-width:100%;display:block}
+a{color:inherit}
+h1,h2,h3{font-stretch:125%;font-weight:900;line-height:1.02;letter-spacing:-.02em;margin:0;text-wrap:balance}
+h2{font-size:clamp(34px,4.4vw,56px);margin-bottom:18px}
+h3{font-size:20px;letter-spacing:-.01em}
+p{margin:0 0 1em;max-width:58ch}
+#scene{position:fixed;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+#hud{position:fixed;inset:0;z-index:3;pointer-events:none;font-weight:800;font-size:14px;color:var(--k)}
+#hud svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+#hud polyline{fill:none;stroke:currentColor;stroke-width:1.5}
+#hud .dot{fill:var(--y);stroke:currentColor;stroke-width:2}
+#hud div{position:absolute;left:0;top:0;white-space:nowrap;padding:5px 11px;border-radius:999px;background:var(--k);color:var(--y);font-stretch:112%;letter-spacing:.005em}
+#hud[data-tone=light]{color:var(--y)}
+#hud[data-tone=light] div{background:var(--y);color:var(--k)}
+#hud .cl{opacity:0;transition:opacity .45s}
+#hud .cl.on{opacity:1}
+.no3d #hud{display:none}
+.no3d #scene{display:none}
+section,footer{position:relative}
+.wrap{position:relative;z-index:2;max-width:1240px;margin:0 auto;padding:0 max(5vw,16px)}
+
+/* barra in alto: capsula di vetro che galleggia */
+.top{position:fixed;top:12px;left:0;right:0;z-index:20;padding:0 max(3vw,10px);pointer-events:none}
+.navbar{pointer-events:auto;max-width:1240px;margin:0 auto;display:flex;align-items:center;gap:14px;height:64px;padding:0 8px 0 14px;border-radius:999px;background:rgba(255,255,255,.74);-webkit-backdrop-filter:blur(18px) saturate(1.6);backdrop-filter:blur(18px) saturate(1.6);border:1px solid rgba(17,17,17,.1);box-shadow:0 14px 34px -16px rgba(0,0,0,.45)}
+.logo{display:block;flex:none}
+.logo img{height:46px;width:auto}
+.links{position:relative;display:flex;gap:2px;margin-left:auto;padding:4px;border-radius:999px;background:rgba(17,17,17,.06)}
+.links a{position:relative;z-index:1;padding:9px 15px;border-radius:999px;font-weight:700;font-size:14.5px;text-decoration:none;color:var(--k);transition:color .3s;white-space:nowrap}
+.links a.on{color:var(--y)}
+.links .ind{position:absolute;z-index:0;top:4px;bottom:4px;left:0;width:0;border-radius:999px;background:var(--k);opacity:0;transition:transform .5s cubic-bezier(.2,.8,.2,1),width .5s cubic-bezier(.2,.8,.2,1),opacity .3s}
+.live{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:700;white-space:nowrap;padding:0 4px}
+.live i{width:9px;height:9px;border-radius:50%;background:var(--r);box-shadow:0 0 0 4px rgba(227,36,27,.18)}
+.live.open i{background:#1fbf6a;box-shadow:0 0 0 4px rgba(31,191,106,.2);animation:pulse 2s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(31,191,106,0)}}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 22px;border-radius:999px;font-weight:800;font-size:16px;text-decoration:none;border:2px solid var(--k);white-space:nowrap;cursor:pointer;font-family:inherit;transition:transform .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--r);outline-offset:2px}
+.b-k{background:var(--k);color:var(--y)}
+.b-y{background:var(--y);color:var(--k);border-color:var(--y)}
+.b-o{background:transparent;color:inherit;border-color:currentColor}
+.top .btn{min-height:46px;padding:0 20px;font-size:15px}
+
+/* sezioni con la ruota */
+.scene{min-height:100svh;display:grid;align-items:center;padding:96px 0}
+.scene .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px;width:100%}
+.scene[data-side=right] .copy{grid-column:2}
+.copy{padding:8px 0}
+.lead{font-size:clamp(18px,1.6vw,21px);font-weight:500}
+.y{background:var(--y);color:var(--k)}
+.w{background:var(--w);color:var(--k)}
+.k{background:var(--k);color:var(--w)}
+.k .lead,.k p{color:#e8e8e8}
+
+/* hero */
+.hero{min-height:100svh;padding:120px 0 28px;overflow:hidden;align-items:stretch}
+.hero .wrap{grid-template-rows:1fr auto;row-gap:36px}
+.hero .copy{align-self:center}
+.hero h1{font-size:clamp(60px,8.4vw,136px);line-height:.86;letter-spacing:-.04em;margin:0 0 14px}
+.hero h1 span{display:block}
+.sign{font-stretch:125%;font-weight:800;font-size:clamp(17px,1.7vw,25px);letter-spacing:-.01em;margin:0 0 22px}
+.status{display:inline-flex;align-items:center;gap:10px;font-weight:700;font-size:15px;background:var(--k);color:var(--w);padding:8px 16px 8px 12px;border-radius:999px;margin:0 0 22px}
+.status::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--r)}
+.status.open::before{background:#35d07f}
+.ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px}
+.strip{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.strip>*{background:var(--k);color:var(--w);border-radius:20px;padding:16px 20px;display:grid;gap:2px;text-decoration:none;min-height:84px;align-content:center}
+.strip small{font-size:13px;color:#bdbdbd;font-weight:600}
+.strip b{font-size:17px;font-weight:800}
+.strip .stars{color:var(--y);letter-spacing:2px}
+.strip a:hover{background:#000}
+.strip a b::after{content:" \2192";color:var(--y)}
+.track{position:absolute;inset:0;z-index:0;pointer-events:none;width:100%;height:100%}
+.track .band{stroke:var(--k)}
+.track .blocks{stroke:var(--y)}
+.track g{clip-path:inset(0 100% 0 0)}
+.go .track g{animation:wipe 2.1s cubic-bezier(.2,.7,.2,1) forwards}
+.no3d .track g{clip-path:none}
+@keyframes wipe{to{clip-path:inset(0 0 0 0)}}
+.ticker{position:relative;z-index:3;background:var(--k);color:var(--y);overflow:hidden;white-space:nowrap;font-stretch:125%;font-weight:900;font-size:clamp(18px,2vw,26px);padding:14px 0}
+.ticker div{display:inline-block;animation:tick 38s linear infinite}
+.ticker span{margin:0 22px}
+.ticker i{font-style:normal;color:var(--w);opacity:.5}
+@keyframes tick{to{transform:translateX(-50%)}}
+.scene[data-ghost]::after{content:attr(data-ghost);position:absolute;z-index:0;top:50%;transform:translateY(-50%);font-stretch:125%;font-weight:900;font-size:clamp(120px,17vw,280px);line-height:1;letter-spacing:-.04em;color:transparent;-webkit-text-stroke:2px rgba(0,0,0,.1);white-space:nowrap;pointer-events:none}
+.scene[data-side=left][data-ghost]::after{right:-1vw}
+.scene[data-side=right][data-ghost]::after{left:-1vw}
+.k[data-ghost]::after{-webkit-text-stroke-color:rgba(255,207,27,.16)}
+.chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:22px 0 24px}
+.chips div{border:2px solid var(--k);border-radius:16px;padding:12px 14px;font-size:14.5px;line-height:1.45}
+.chips b{display:block;font-size:16px;margin-bottom:2px}
+.when{list-style:none;margin:20px 0 0;padding:0;display:grid;gap:8px}
+.when li{display:flex;gap:12px;align-items:baseline;color:#e8e8e8}
+.when li::before{content:"";flex:none;width:10px;height:10px;border-radius:2px;background:var(--y);transform:translateY(-1px) rotate(45deg)}
+/* battistrada che scorre fra le sezioni (animazione legata allo scroll, solo CSS) */
+.tread{height:30px;position:relative;z-index:3;background:var(--k);overflow:hidden}
+.tread::before{content:"";position:absolute;inset:6px -60px;background:repeating-linear-gradient(110deg,var(--y) 0 16px,transparent 16px 30px)}
+@supports (animation-timeline:scroll()){
+  .tread::before{animation:roll linear both;animation-timeline:scroll(root)}
+  @keyframes roll{to{transform:translateX(-600px)}}
+}
+
+/* preventivo */
+.quote{margin-top:26px;display:grid;gap:12px;background:var(--y);border-radius:20px;padding:20px}
+.quote .row{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1.3fr) minmax(0,.8fr);gap:10px}
+label{display:grid;gap:4px;font-size:14px;font-weight:700}
+input,select{font:500 16px Archivo,Arial,sans-serif;min-height:48px;padding:0 12px;border:2px solid var(--k);border-radius:12px;background:var(--w);color:var(--k);width:100%}
+.msg{font-size:14px;background:rgba(255,255,255,.6);border-radius:10px;padding:10px 12px;margin:0;max-width:none}
+.decode{list-style:none;margin:18px 0 0;padding:0;display:grid;gap:6px}
+.decode li{display:grid;grid-template-columns:5.2em minmax(0,1fr);gap:12px;align-items:baseline;border-top:1px solid rgba(0,0,0,.14);padding-top:6px;font-size:15px}
+.decode b{font-stretch:125%;font-weight:900;font-size:18px;white-space:nowrap}
+.decode .warn{grid-template-columns:1fr}
+.small{font-size:14px;color:var(--g)}
+.brands{font-size:15px;font-weight:600;margin-top:10px}
+
+/* usura */
+.gauge{margin:24px 0 10px;display:grid;gap:10px}
+.mm{display:flex;align-items:baseline;gap:10px}
+.mm b{font-stretch:125%;font-weight:900;font-size:clamp(56px,7vw,96px);line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.mm span{font-weight:800;font-size:22px}
+.mm[data-lvl="1"] b{color:#b35a00}
+.mm[data-lvl="2"] b{color:var(--r)}
+#mm-note{font-weight:800;font-size:18px;margin:0}
+.bar{position:relative;height:14px;border-radius:7px;background:rgba(0,0,0,.12);overflow:visible}
+.ticks{position:relative;height:22px;font-size:13px;font-weight:700}
+.ticks span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.ticks i{font-style:normal}
+input[type=range]{-webkit-appearance:none;appearance:none;border:0;background:transparent;padding:0;min-height:44px}
+input[type=range]::-webkit-slider-runnable-track{height:6px;background:var(--k);border-radius:3px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;margin-top:-11px;border-radius:50%;background:var(--y);border:3px solid var(--k)}
+input[type=range]::-moz-range-track{height:6px;background:var(--k);border-radius:3px}
+input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:var(--y);border:3px solid var(--k)}
+.tips{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;margin-top:22px}
+.tips div{border-top:3px solid var(--k);padding-top:10px;font-size:15px}
+.tips h3{margin-bottom:4px}
+
+/* letture equilibratura / convergenza */
+.read{display:flex;align-items:baseline;gap:12px;margin:26px 0 6px;flex-wrap:wrap}
+.read b{font-stretch:125%;font-weight:900;font-size:clamp(52px,6.5vw,88px);line-height:1;color:var(--r);font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+.read[data-ok="1"] b{color:var(--y)}
+.read #toe-state{font-size:clamp(40px,4.6vw,64px);white-space:nowrap}
+.read span{font-weight:700;font-size:18px}
+.k .bar{background:rgba(255,255,255,.16)}
+#toe-bar{position:absolute;inset:0 auto 0 0;background:var(--y);border-radius:7px}
+.steps{margin:22px 0 0;padding:0;list-style:none;display:grid;gap:10px;counter-reset:s}
+.steps li{display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;align-items:start;counter-increment:s;color:#e8e8e8}
+.steps li::before{content:counter(s);width:30px;height:30px;border-radius:50%;background:var(--y);color:var(--k);font-weight:900;display:grid;place-items:center;font-size:15px}
+
+/* servizi */
+.band{position:relative;z-index:2;padding:clamp(56px,7vw,110px) 0}
+.facts{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:26px;font-weight:700;font-size:16px}
+.facts span{display:flex;gap:8px;align-items:center}
+.facts span::before{content:"";width:12px;height:12px;background:var(--y);border:2px solid var(--k);border-radius:3px}
+.head h2{margin:0}
+.head{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:40px;align-items:end}
+
+/* dove siamo */
+.where{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:40px;margin-top:36px;align-items:start}
+.photo{border-radius:22px;overflow:hidden;border:3px solid var(--k);background:var(--k)}
+.photo img{width:100%;height:auto;aspect-ratio:16/9;object-fit:cover}
+.info h3{margin:0 0 6px;font-size:22px}
+.phone{font-stretch:125%;font-weight:900;font-size:clamp(30px,3.4vw,44px);letter-spacing:-.02em;text-decoration:none;display:block;margin:4px 0 16px;white-space:nowrap}
+table{border-collapse:collapse;width:100%;font-size:16px;margin:6px 0 22px}
+td{padding:7px 0;border-top:1px solid rgba(0,0,0,.18)}
+td:last-child{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+tr.today td{font-weight:900}
+tr.today td:first-child::after{content:" · oggi";font-weight:700;color:var(--r)}
+.go{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+
+footer{background:var(--k);color:#cfcfcf;font-size:15px;padding:40px 0 120px;z-index:2}
+footer .wrap{display:flex;flex-wrap:wrap;gap:12px 32px;justify-content:space-between}
+footer b{color:var(--y);font-stretch:125%;font-weight:900}
+
+
+/* ingresso: manometro che gonfia la gomma */
+#intro{position:fixed;inset:0;z-index:100;background:var(--k);color:var(--w);display:grid;place-items:center;--r:0px;-webkit-mask:radial-gradient(circle at 50% 46%,transparent var(--r),#000 calc(var(--r) + 1px));mask:radial-gradient(circle at 50% 46%,transparent var(--r),#000 calc(var(--r) + 1px));animation:introSafe .01s 7s forwards}
+@keyframes introSafe{to{visibility:hidden}}
+.mano{display:grid;justify-items:center;text-align:center;margin-top:-4vh}
+.mano .chip{background:var(--y);border-radius:16px;padding:8px 14px;margin-bottom:18px}
+.mano .chip img{height:46px;width:auto}
+.mano svg{width:min(76vw,340px);height:auto;overflow:visible}
+.mano path{fill:none}
+.mano .trk{stroke:#262626}
+.mano .tk{stroke:#5a5a5a}
+.mano .zone{stroke:#1fbf6a}
+.mano .fill{stroke:var(--y)}
+.mano text{fill:#8d8d8d;font:800 13px Archivo,Arial,sans-serif}
+.mano .needle{stroke:var(--r);stroke-width:4;stroke-linecap:round}
+.mano .psi{font-stretch:125%;font-weight:900;font-size:50px;line-height:1;font-variant-numeric:tabular-nums;margin-top:-26px}
+.mano .psi small{font-size:16px;color:#9a9a9a;margin-left:6px;font-stretch:100%}
+.mano p{margin:14px 0 0;color:#bdbdbd;font-size:15px;font-weight:600}
+#intro.ok .psi{color:#1fbf6a}
+
+/* tasti veloci sempre visibili */
+.quick{position:fixed;right:20px;bottom:24px;z-index:40;display:grid;gap:10px}
+.quick a{position:relative;display:grid;place-items:center;width:58px;height:58px;border-radius:50%;text-decoration:none;box-shadow:0 12px 26px -10px rgba(0,0,0,.55);transition:transform .2s}
+.quick a:hover{transform:scale(1.08)}
+.quick a:focus-visible{outline:3px solid var(--r);outline-offset:3px}
+.quick svg{width:26px;height:26px;fill:currentColor}
+.quick span{position:absolute;right:70px;top:50%;transform:translate(8px,-50%);opacity:0;pointer-events:none;background:var(--k);color:var(--w);font-weight:800;font-size:14px;padding:7px 13px;border-radius:999px;white-space:nowrap;transition:opacity .2s,transform .2s}
+.quick a:hover span,.quick a:focus-visible span{opacity:1;transform:translate(0,-50%)}
+.q-wa{background:#1fbf6a;color:#fff}
+.q-mail{background:var(--w);color:var(--k);border:2px solid var(--k)}
+.q-tel{background:var(--y);color:var(--k);border:2px solid var(--k)}
+
+/* gomme: marchi e fianco in rilievo */
+.brandchips{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 4px}
+.brandchips span{font-stretch:118%;font-weight:800;font-size:13.5px;padding:6px 11px;border-radius:999px;background:#f2f2f2;border:1px solid #e3e3e3}
+.sidewall{margin-top:22px;background:radial-gradient(120% 160% at 50% 130%,#2d2d2d,#111 62%);border-radius:22px;padding:22px 18px 16px;color:#3d3d3d;font-stretch:125%;font-weight:900;font-size:clamp(28px,3.4vw,48px);line-height:1.1;letter-spacing:.01em;text-shadow:0 1px 0 #5a5a5a,0 -1px 0 #000;white-space:nowrap;overflow:hidden;text-align:center}
+.sidewall span{transition:color .35s,text-shadow .35s}
+.sidewall span.hi{color:var(--y);text-shadow:0 0 22px rgba(255,207,27,.5)}
+.sidewall small{display:block;font:600 13px Archivo,Arial,sans-serif;color:#8d8d8d;letter-spacing:0;text-shadow:none;margin-top:8px;white-space:normal}
+.decode li{transition:background .25s;border-radius:6px}
+.decode li.hi{background:#fff3c4}
+
+/* usura: sezione del battistrada */
+.cut{width:100%;height:auto;display:block;margin:4px 0 0}
+.cut .rub,.cut .tb{fill:var(--k)}
+.cut .ln{stroke-width:2;stroke-dasharray:6 6}
+.cut .l3{stroke:#9a4d00}.cut .l16{stroke:var(--r)}
+.cut text{font:800 14px Archivo,Arial,sans-serif}
+.cut .t3{fill:#7a3d00}.cut .t16{fill:var(--r)}
+.mm[data-lvl="2"] ~ .cut .tb{fill:var(--r)}
+
+/* equilibratura: quadrante */
+.dialrow{display:grid;grid-template-columns:auto minmax(0,1fr);gap:28px;align-items:center;margin-top:26px}
+.dial{position:relative;width:176px;height:176px;flex:none}
+.dial svg{width:100%;height:100%;transform:rotate(-90deg)}
+.dial circle{fill:none}
+.dial .tks{stroke:#3a3a3a}
+.dial .dt{stroke:#232323}
+.dial .dv{stroke:var(--r);transition:stroke .3s}
+.dial[data-ok="1"] .dv{stroke:var(--y)}
+.dial .dn{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.dial .dn b{font-stretch:125%;font-weight:900;font-size:56px;line-height:1;color:var(--r);font-variant-numeric:tabular-nums}
+.dial[data-ok="1"] .dn b{color:var(--y)}
+.dial .dn span{font-size:13px;font-weight:700;color:#bdbdbd}
+.dialrow .steps{margin:0}
+
+/* convergenza: auto vista dall'alto */
+.convrow{display:grid;grid-template-columns:150px minmax(0,1fr);gap:30px;align-items:center;margin-top:26px}
+.car{width:150px;height:auto;overflow:visible}
+.car .body{fill:#1b1b1b;stroke:#3c3c3c;stroke-width:2}
+.car .glass{fill:#2c2c2c}
+.car .wh{fill:#000;stroke:#666;stroke-width:1.5}
+.car .ref{stroke:rgba(255,255,255,.32);stroke-width:1.5;stroke-dasharray:4 5}
+.car .las{stroke:var(--r);stroke-width:2.5;transition:stroke .3s}
+.car[data-ok="1"] .las{stroke:var(--y)}
+.convrow .when{margin:0}
+
+/* vetrina cerchi */
+.vetrina{background:#d6d6d8;color:var(--k);overflow:hidden}
+.vhead{display:flex;justify-content:space-between;align-items:end;gap:20px;flex-wrap:wrap}
+.vhead h2{margin:0}
+.vhead p{margin:10px 0 0}
+.arrows{display:flex;gap:8px}
+.arrows button{width:54px;height:54px;border-radius:50%;border:2px solid var(--k);background:var(--w);color:var(--k);font:900 22px Archivo,Arial,sans-serif;cursor:pointer;transition:background .2s}
+.arrows button:hover{background:var(--y)}
+.rail{display:flex;gap:18px;overflow-x:auto;scroll-snap-type:x mandatory;padding:30px max(5vw,16px) 12px;margin:0 calc(-1 * max(5vw,16px));scrollbar-width:none;cursor:grab;overscroll-behavior-x:contain}
+.rail::-webkit-scrollbar{display:none}
+.rail.drag{cursor:grabbing;scroll-snap-type:none}
+.rimcard{flex:0 0 min(78vw,330px);scroll-snap-align:start;background:var(--w);border-radius:26px;padding:16px 16px 20px;display:grid;gap:8px;user-select:none}
+.stage{position:relative;aspect-ratio:1;border-radius:20px;background:radial-gradient(circle at 50% 42%,#f6f6f7,#c9c9cc 72%);overflow:hidden}
+.stage::after{content:"";position:absolute;left:20%;right:20%;bottom:5%;height:6%;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.3),transparent)}
+.stage .spin{position:absolute;inset:5%;transform:rotate(var(--rot,0deg));will-change:transform}
+.stage img{width:100%;height:100%;object-fit:cover;clip-path:circle(44.5% at 50% 49%);transform-origin:50% 49%;transition:transform 1.4s cubic-bezier(.2,.7,.2,1);-webkit-user-drag:none}
+.rimcard:hover .stage img{transform:rotate(144deg)}
+.tag{justify-self:start;font-size:12.5px;font-weight:800;background:var(--k);color:var(--y);border-radius:999px;padding:4px 10px;margin-top:6px}
+.rimcard h3{font-size:19px}
+.rimcard p{margin:0;font-size:14.5px;color:#555}
+.rimcard .btn{justify-self:start;min-height:44px;font-size:15px;margin-top:6px}
+.note{font-size:13.5px;color:#3a3a3a;margin:16px 0 0}
+
+/* servizi a mosaico */
+.svc{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:36px}
+.svc a{background:var(--w);border:2px solid var(--k);border-radius:22px;padding:20px;min-height:210px;display:flex;flex-direction:column;gap:10px;text-decoration:none;color:var(--k);transition:transform .25s,background .25s}
+.svc a:hover{transform:translateY(-4px);background:var(--y)}
+.svc .ico{width:64px;height:64px;border-radius:50%;background:#f1f1f1;display:grid;place-items:center;transition:background .25s}
+.svc a:hover .ico{background:var(--w)}
+.svc svg{width:40px;height:40px}
+.svc p{font-size:15px;margin:0}
+.svc .more{margin-top:auto;font-weight:800;font-size:14px}
+.svc a.big{grid-column:span 2;background:var(--k);color:var(--w);min-height:250px}
+.svc a.big h3{font-size:clamp(24px,2.4vw,32px)}
+.svc a.big p{color:#cfcfcf;font-size:16px;max-width:40ch}
+.svc a.big .ico{background:var(--y);width:84px;height:84px}
+.svc a.big svg{width:54px;height:54px}
+.svc a.big .more{color:var(--y)}
+.svc a.big:hover{background:#000}
+.svc a.wide{grid-column:span 2}
+
+@media (max-width:899px){
+  .links,#hud,.track{display:none}
+  .live{margin-left:auto}
+  .top{top:8px}
+  .navbar{height:58px;padding:0 6px 0 10px}
+  .logo img{height:40px}
+  .scene[data-ghost]::after{display:none}
+  .strip{grid-template-columns:minmax(0,1fr)}
+  .strip>*{min-height:0}
+  .hero .wrap{row-gap:24px}
+  .scene{min-height:auto;padding:0 0 56px;align-items:start}
+  .scene::before{content:"";display:block;height:min(56svh,88vw)}
+  .has3d .scene::before{height:min(52svh,92vw)}
+  .no3d .scene::before{height:24px}
+  .scene .wrap{grid-template-columns:minmax(0,1fr)}
+  .scene[data-side=right] .copy{grid-column:1}
+  .copy{background:inherit;border-radius:22px 22px 0 0;padding-top:20px}
+  .y .copy{background:var(--y)}.w .copy{background:var(--w)}.k .copy{background:var(--k)}
+  .hero{padding:0 0 28px}
+  .chips{grid-template-columns:minmax(0,1fr)}
+  .hero h1{font-size:clamp(56px,17vw,120px)}
+  .svc{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .head,.where{grid-template-columns:minmax(0,1fr);gap:20px}
+  .quick{left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;background:rgba(17,17,17,.86);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);padding:8px;border-radius:22px;box-shadow:0 10px 30px -10px rgba(0,0,0,.5)}
+  .quick a{width:auto;height:50px;border-radius:15px;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:none;border:0}
+  .quick a:hover{transform:none}
+  .quick svg{width:20px;height:20px}
+  .quick span{position:static;opacity:1;transform:none;background:none;color:inherit;padding:0;font-size:15px}
+  .svc a.big,.svc a.wide{grid-column:1/-1}
+  .dialrow{grid-template-columns:minmax(0,1fr);justify-items:start}
+  .convrow{grid-template-columns:110px minmax(0,1fr);gap:20px}
+  .car{width:110px}
+}
+@media (max-width:420px){.live b{display:none}}
+@media (max-width:560px){
+  .quote .row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .quote .row label:first-child{grid-column:1/-1}
+  .svc{grid-template-columns:minmax(0,1fr)}
+  .svc a,.svc a.big{min-height:0}
+  .tips{grid-template-columns:minmax(0,1fr)}
+  .ticks i{display:none}
+  .btn{padding:0 18px}
+}
+@media (prefers-reduced-motion:reduce){.tread::before,.ticker div,.live.open i{animation:none}.track g{animation:none;clip-path:none}.btn,.stage img,.svc a{transition:none}#intro{display:none}}
+</style>
+</head>
+<body>
+<noscript><style>#intro{display:none}</style></noscript>
+<div id="intro" aria-hidden="true">
+  <div class="mano">
+    <div class="chip"><img src="%%LOGONAV%%" alt="" width="128" height="46"></div>
+    <svg viewBox="0 0 240 190">
+      <path class="trk" d="M40.3 166 A92 92 0 1 1 199.7 166" stroke-width="14" pathLength="100"/>
+      <path class="zone" d="M40.3 166 A92 92 0 1 1 199.7 166" stroke-width="14" pathLength="100" stroke-dasharray="10 90" stroke-dashoffset="-52.5"/>
+      <path class="fill" id="mano-fill" d="M40.3 166 A92 92 0 1 1 199.7 166" stroke-width="14" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/>
+      <path class="tk" d="M40.3 166 A92 92 0 1 1 199.7 166" stroke-width="24" pathLength="100" stroke-dasharray="0.5 12" stroke-dashoffset="0.25"/>
+      <text x="61" y="158" text-anchor="middle">0</text><text x="61" y="90" text-anchor="middle">1</text><text x="120" y="57" text-anchor="middle">2</text><text x="179" y="90" text-anchor="middle">3</text><text x="179" y="158" text-anchor="middle">4</text>
+      <line class="needle" id="mano-needle" x1="120" y1="120" x2="120" y2="44" transform="rotate(-120 120 120)"/>
+      <circle cx="120" cy="120" r="9" fill="#ffcf1b"/>
+    </svg>
+    <div class="psi"><span id="psi">0,0</span><small>bar</small></div>
+    <p id="mano-txt">Gonfiamo le gomme…</p>
+  </div>
+</div>
+<canvas id="scene" aria-hidden="true"></canvas>
+
+<header class="top">
+  <div class="navbar">
+    <a class="logo" href="#top" aria-label="Pronto Gomme, torna su"><img src="%%LOGONAV%%" alt="Pronto Gomme" width="128" height="46"></a>
+    <nav class="links" aria-label="Sezioni"><span class="ind" aria-hidden="true"></span><a data-s="gomme" href="#gomme">Gomme</a><a data-s="cerchi" href="#cerchi">Cerchi</a><a data-s="equilibratura" href="#equilibratura">Equilibratura</a><a data-s="convergenza" href="#convergenza">Convergenza</a><a data-s="dove" href="#dove">Dove siamo</a></nav>
+    <span class="live" data-live><i></i><b>Orari</b></span>
+    <a class="btn b-k" href="tel:+393270107728">Chiama</a>
+  </div>
+</header>
+<div id="hud" aria-hidden="true" data-tone="dark"><svg id="hud-lines"></svg></div>
+
+<main id="top">
+<section class="scene hero y" id="hero" data-side="left">
+  <svg class="track" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <g>
+      <path class="band" d="M-60 905 C 260 900, 620 880, 880 812 S 1210 700, 1500 640" fill="none" stroke-width="64"/>
+      <path class="blocks" d="M-60 905 C 260 900, 620 880, 880 812 S 1210 700, 1500 640" fill="none" stroke-width="38" stroke-dasharray="9 13"/>
+    </g>
+  </svg>
+  <div class="wrap">
+    <div class="copy">
+      <h1><span>PRONTO</span><span>GOMME</span></h1>
+      <p class="sign">CONVERGENZA ed EQUILIBRATURA</p>
+      <p class="lead">Il gommista di Via Messina Marine a Palermo. Gomme nuove, cerchi, equilibratura e convergenza: chiama, passa da noi e riparti tranquillo.</p>
+      <div class="ctas">
+        <a class="btn b-k" href="tel:+393270107728">Chiama 327 010 7728</a>
+        <a class="btn b-o" href="https://wa.me/393270107728" target="_blank" rel="noopener">Scrivici su WhatsApp</a>
+      </div>
+    </div>
+    <div class="strip">
+      <div><small>Oggi</small><b data-status>Lun–ven 7:30–19:00, sab 7:30–13:30</b></div>
+      <div><small>Su Google</small><b><span class="stars">★★★★★</span> 4,6 su 5 · 36 recensioni</b></div>
+      <a href="https://www.google.com/maps/search/?api=1&query=Pronto+Gomme+Via+Messina+Marine+707+Palermo" target="_blank" rel="noopener"><small>Via Messina Marine 707/709, Palermo</small><b>Portami lì</b></a>
+    </div>
+  </div>
+</section>
+<div class="ticker" aria-hidden="true"><div><span>GOMME NUOVE</span><i>●</i><span>CERCHI IN LEGA</span><i>●</i><span>EQUILIBRATURA</span><i>●</i><span>CONVERGENZA</span><i>●</i><span>RIPARAZIONE FORATURE</span><i>●</i><span>CAMBIO STAGIONALE</span><i>●</i><span>GOMME NUOVE</span><i>●</i><span>CERCHI IN LEGA</span><i>●</i><span>EQUILIBRATURA</span><i>●</i><span>CONVERGENZA</span><i>●</i><span>RIPARAZIONE FORATURE</span><i>●</i><span>CAMBIO STAGIONALE</span><i>●</i></div></div>
+
+<section class="scene w" id="gomme" data-side="right" data-ghost="R16">
+  <div class="wrap">
+    <div class="copy">
+      <h2>Gomme nuove per la tua auto</h2>
+      <p class="lead">Ti troviamo la misura giusta al prezzo giusto, te le montiamo e le equilibriamo sul posto.</p>
+      <p class="brands">Tra i marchi che trattiamo:</p>
+      <div class="brandchips"><span>Bridgestone</span><span>Michelin</span><span>Pirelli</span><span>Continental</span><span>Goodyear</span><span>Dunlop</span><span>Firestone</span><span>Hankook</span><span>Yokohama</span><span>Toyo</span><span>Uniroyal</span><span>Linglong</span><span>Radar</span></div>
+      <form class="quote" id="quote">
+        <div class="row">
+          <label for="q-size">Misura (sul fianco)<input id="q-size" placeholder="205/55 R16 91V" autocomplete="off"></label>
+          <label for="q-car">Auto<input id="q-car" placeholder="Fiat Tipo" autocomplete="off"></label>
+          <label for="q-n">Quante<select id="q-n"><option>4</option><option>2</option><option>1</option></select></label>
+        </div>
+        <p class="msg" id="q-msg"></p>
+        <div class="ctas">
+          <a class="btn b-k" id="q-wa" href="https://wa.me/393270107728" target="_blank" rel="noopener">Chiedi il preventivo su WhatsApp</a>
+          <button class="btn b-o" type="button" id="q-copy">Copia il messaggio</button>
+        </div>
+      </form>
+      <div class="sidewall" id="sidewall" aria-hidden="true"></div>
+      <ul class="decode" id="decode" aria-live="polite"></ul>
+      <p class="small">Come si legge la misura: <span id="decode-of"></span></p>
+    </div>
+  </div>
+</section>
+
+<section class="scene y" id="usura" data-side="left" data-ghost="1,6">
+  <div class="wrap">
+    <div class="copy">
+      <h2>Quando vanno cambiate?</h2>
+      <p class="lead">Una gomma nuova ha circa 8 mm di battistrada. Per legge non si può scendere sotto 1,6 mm, ma già sotto i 3 mm sul bagnato frena peggio.</p>
+      <div class="gauge">
+        <div class="mm" data-lvl="0"><b id="mm">8,0</b><span>mm</span></div>
+        <p id="mm-note">Gomma in buono stato</p>
+        <svg class="cut" viewBox="0 0 560 150" role="img" aria-label="Sezione del battistrada: altezza dei tasselli rispetto ai limiti di 3 mm e 1,6 mm">
+          <rect class="rub" x="0" y="110" width="440" height="40" rx="8"/>
+          <g id="cut-blocks"><rect class="tb" x="8" y="30" width="66" height="82" rx="5"/><rect class="tb" x="96" y="30" width="66" height="82" rx="5"/><rect class="tb" x="184" y="30" width="66" height="82" rx="5"/><rect class="tb" x="272" y="30" width="66" height="82" rx="5"/><rect class="tb" x="360" y="30" width="66" height="82" rx="5"/></g>
+          <line class="ln l3" x1="0" y1="80" x2="450" y2="80"/><line class="ln l16" x1="0" y1="94" x2="450" y2="94"/>
+          <text class="t3" x="458" y="78">3 mm</text><text class="t16" x="458" y="108">1,6 mm</text>
+          <text x="458" y="36" fill="#111">8 mm</text>
+        </svg>
+        <label for="wear">Prova tu: sposta per consumare la gomma<input type="range" id="wear" min="0" max="100" value="0"></label>
+      </div>
+      <div class="tips">
+        <div><h3>Consumo storto?</h3>Se la gomma è più consumata da un lato, quasi sempre è la convergenza.</div>
+        <div><h3>Gomme vecchie</h3>Anche con tanto battistrada, la gomma invecchia. Sul fianco c'è la data: passa e la controlliamo.</div>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="tread" aria-hidden="true"></div>
+
+<section class="scene w" id="cerchi" data-side="right" data-ghost="R19">
+  <div class="wrap">
+    <div class="copy">
+      <h2>Cerchi nuovi e usati rimessi a nuovo</h2>
+      <p class="lead">Cerchi in lega nuovi, anche GMP, e cerchi usati ricondizionati in ottimo stato. Scegli il cerchio, noi montiamo le gomme, equilibriamo e ti diamo la ruota pronta.</p>
+      <h3>Cosa controlliamo prima di montarli</h3>
+      <div class="chips">
+        <div><b>Diametro e canale</b>La misura in pollici, per esempio 19×8J.</div>
+        <div><b>Foratura</b>Numero di bulloni e interasse, per esempio 5×112.</div>
+        <div><b>Offset (ET)</b>Quanto il cerchio sporge o rientra nel passaruota.</div>
+        <div><b>Foro centrale</b>Deve combaciare col mozzo, se no si usano gli anelli di centraggio.</div>
+      </div>
+      <p>Se cambi misura di cerchio ti diciamo quali gomme vanno bene per la tua auto, così resti in regola con il libretto.</p>
+      <div class="ctas"><a class="btn b-k" href="#vetrina">Guarda la vetrina</a><a class="btn b-o" href="https://wa.me/393270107728?text=Ciao%20Pronto%20Gomme%2C%20vorrei%20informazioni%20sui%20cerchi" target="_blank" rel="noopener">Chiedi dei cerchi</a></div>
+    </div>
+  </div>
+</section>
+
+<section class="band vetrina" id="vetrina">
+  <div class="wrap">
+    <div class="vhead">
+      <div><h2>Vetrina cerchi</h2><p class="lead">Scorri e scegli lo stile. Ti diciamo noi misure e disponibilità per la tua auto.</p></div>
+      <div class="arrows"><button type="button" id="v-prev" aria-label="Cerchio precedente">←</button><button type="button" id="v-next" aria-label="Cerchio successivo">→</button></div>
+    </div>
+    <div class="rail" id="rail"></div>
+    <p class="note">Immagini indicative. Misure, finiture e prezzi dipendono dalla tua auto: chiedi e ti rispondiamo.</p>
+  </div>
+</section>
+<div class="tread" aria-hidden="true"></div>
+
+<section class="scene k" id="equilibratura" data-side="left" data-ghost="0 g">
+  <div class="wrap">
+    <div class="copy">
+      <h2>Il volante vibra? È l'equilibratura</h2>
+      <p class="lead">Nessuna ruota pesa uguale in ogni punto. In velocità bastano pochi grammi di differenza per far tremare volante e sedili.</p>
+      <div class="dialrow">
+        <div class="dial" id="dial" data-ok="0">
+          <svg viewBox="0 0 176 176" aria-hidden="true">
+            <circle class="tks" cx="88" cy="88" r="84" stroke-width="6" pathLength="120" stroke-dasharray="0.6 2.4"/>
+            <circle class="dt" cx="88" cy="88" r="70" stroke-width="12"/>
+            <circle class="dv" id="dial-v" cx="88" cy="88" r="70" stroke-width="12" stroke-linecap="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="0"/>
+          </svg>
+          <div class="dn"><b id="grams">35</b><span>grammi di squilibrio</span></div>
+        </div>
+        <ol class="steps">
+          <li>Mettiamo la ruota sull'equilibratrice e la facciamo girare.</li>
+          <li>La macchina misura dove manca peso.</li>
+          <li>Aggiungiamo piccoli contrappesi sul cerchio fino ad arrivare a zero.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="scene k" id="convergenza" data-side="right" data-ghost="0,0°">
+  <div class="wrap">
+    <div class="copy">
+      <h2>La macchina tira da una parte?</h2>
+      <p class="lead">Se le ruote non sono dritte, l'auto tira, il volante resta storto e le gomme si consumano su un lato solo. Con la convergenza le rimettiamo in linea.</p>
+      <div class="read" data-ok="0"><b id="toe-state">Fuori asse</b></div>
+      <div class="bar"><div id="toe-bar"></div></div>
+      <div class="convrow">
+          <svg class="car" id="car" data-ok="0" viewBox="0 0 200 320" aria-hidden="true">
+            <line class="ref" x1="44" y1="110" x2="44" y2="-50"/><line class="ref" x1="156" y1="110" x2="156" y2="-50"/>
+            <rect class="body" x="50" y="30" width="100" height="262" rx="40"/>
+            <path class="glass" d="M64 108 H136 L128 140 H72 Z"/><path class="glass" d="M72 222 H128 L134 246 H66 Z"/>
+            <rect class="wh" x="36" y="206" width="16" height="42" rx="4"/><rect class="wh" x="148" y="206" width="16" height="42" rx="4"/>
+            <g id="wfl"><line class="las" x1="44" y1="70" x2="44" y2="-50"/><rect class="wh" x="36" y="70" width="16" height="42" rx="4"/></g>
+            <g id="wfr"><line class="las" x1="156" y1="70" x2="156" y2="-50"/><rect class="wh" x="148" y="70" width="16" height="42" rx="4"/></g>
+          </svg>
+        <ul class="when">
+          <li>Dopo una buca forte o un urto contro il marciapiede</li>
+          <li>Quando monti gomme nuove</li>
+          <li>Se andando dritto il volante resta storto</li>
+        </ul>
+      </div>
+      <p class="small" style="color:#bdbdbd;margin-top:16px">Nel disegno l'angolo è esagerato per farlo vedere.</p>
+    </div>
+  </div>
+</section>
+<div class="tread" aria-hidden="true"></div>
+
+<section class="band w" id="servizi">
+  <div class="wrap">
+    <div class="head">
+      <h2>Tutto quello che facciamo</h2>
+      <p class="lead" style="margin:0">Un'officina sola, in Via Messina Marine. Per i prezzi chiamaci o scrivici: ti facciamo il preventivo su misura.</p>
+    </div>
+    <div class="svc" id="svc"></div>
+    <div class="facts"><span>Carte di credito e bancomat</span><span>Pagamenti contactless</span><span>Ingresso accessibile in sedia a rotelle</span></div>
+  </div>
+</section>
+<div class="tread" aria-hidden="true"></div>
+
+<section class="band y" id="dove">
+  <div class="wrap">
+    <h2>Dove siamo</h2>
+    <div class="where">
+      <figure class="photo" style="margin:0"><img src="%%PHOTO%%" alt="L'officina Pronto Gomme in Via Messina Marine 707/709 al tramonto, con le due serrande aperte e le insegne gialle" width="1400" height="788" loading="lazy"></figure>
+      <div class="info">
+        <h3>Via Messina Marine 707/709<br>90121 Palermo</h3>
+        <p class="status" data-status style="margin-top:10px">Orari qui sotto</p>
+        <a class="phone" href="tel:+393270107728">327 010 7728</a>
+        <table id="orari" aria-label="Orari di apertura">
+          <tr data-d="1"><td>Lunedì</td><td>7:30–19:00</td></tr>
+          <tr data-d="2"><td>Martedì</td><td>7:30–19:00</td></tr>
+          <tr data-d="3"><td>Mercoledì</td><td>7:30–19:00</td></tr>
+          <tr data-d="4"><td>Giovedì</td><td>7:30–19:00</td></tr>
+          <tr data-d="5"><td>Venerdì</td><td>7:30–19:00</td></tr>
+          <tr data-d="6"><td>Sabato</td><td>7:30–13:30</td></tr>
+          <tr data-d="0"><td>Domenica</td><td>Chiuso</td></tr>
+        </table>
+        <div class="go">
+          <a class="btn b-k" href="https://www.google.com/maps/search/?api=1&query=Pronto+Gomme+Via+Messina+Marine+707+Palermo" target="_blank" rel="noopener">Portami lì</a>
+          <a class="btn b-o" href="https://wa.me/393270107728" target="_blank" rel="noopener">WhatsApp</a>
+          <a class="btn b-o" href="https://www.facebook.com/p/pronto-gomme-61555418111004/" target="_blank" rel="noopener">Facebook</a>
+        </div>
+        <p class="small" style="color:#333;margin-top:14px">Email: prontogomme19@gmail.com</p>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span><img src="%%LOGOFULL%%" alt="Pronto Gomme, convergenza ed equilibratura" width="200" height="113" style="height:auto;width:200px;margin-bottom:10px;background:var(--y);border-radius:14px;padding:10px 12px"><br><b>PRONTO GOMME</b> di Sampino Antonina Irene</span>
+    <span>Via Messina Marine 707/709, 90121 Palermo · Tel. 327 010 7728</span>
+  </div>
+</footer>
+
+<nav class="quick" aria-label="Contatti rapidi">
+  <a class="q-wa" href="https://wa.me/393270107728" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5A9.5 9.5 0 0 0 3.8 16.8L2.5 21.5l4.8-1.3A9.5 9.5 0 1 0 12 2.5zm0 1.8a7.7 7.7 0 1 1-3.9 14.3l-.3-.2-2.8.8.8-2.7-.2-.3A7.7 7.7 0 0 1 12 4.3zm-3.1 3.9c-.2 0-.5 0-.7.3-.3.3-.9.9-.9 2.1s.9 2.4 1 2.6c.1.2 1.8 2.8 4.4 3.8 2.2.9 2.6.7 3.1.6.5 0 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.2-.2-.5-.3l-1.7-.8c-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1-.3-.1-1.1-.4-2-1.3-.8-.7-1.3-1.5-1.4-1.8-.2-.3 0-.4.1-.5l.4-.5.3-.5c.1-.2 0-.3 0-.5l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5z"/></svg><span>WhatsApp</span></a>
+  <a class="q-mail" href="mailto:prontogomme19@gmail.com"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm1 2.4V17h16V7.4l-8 5.3-8-5.3zM5.6 7l6.4 4.2L18.4 7H5.6z"/></svg><span>Email</span></a>
+  <a class="q-tel" href="tel:+393270107728"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.2 15.2 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"/></svg><span>Chiama</span></a>
+</nav>
+
+<script>
+{
+  const I = {
+    tyre:'<circle cx="22" cy="22" r="18" fill="none" stroke="#111" stroke-width="6"/><circle cx="22" cy="22" r="7" fill="#ffcf1b" stroke="#111" stroke-width="3"/>',
+    rim:'<circle cx="22" cy="22" r="18" fill="#ffcf1b" stroke="#111" stroke-width="3"/><g stroke="#111" stroke-width="3"><line x1="22" y1="5" x2="22" y2="39"/><line x1="5" y1="22" x2="39" y2="22"/><line x1="10" y1="10" x2="34" y2="34"/><line x1="34" y1="10" x2="10" y2="34"/></g><circle cx="22" cy="22" r="5" fill="#111"/>',
+    swap:'<path d="M8 16h24l-6-6M36 28H12l6 6" fill="none" stroke="#111" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>',
+    season:'<circle cx="15" cy="15" r="7" fill="#ffcf1b" stroke="#111" stroke-width="3"/><path d="M30 22v16M23 26l14 8M37 26l-14 8" stroke="#111" stroke-width="3" stroke-linecap="round"/>',
+    bal:'<path d="M22 6v30M8 36h28" stroke="#111" stroke-width="3.5" stroke-linecap="round"/><path d="M6 14h32" stroke="#111" stroke-width="3"/><path d="M6 14l-4 10h8zM38 14l-4 10h8z" fill="#ffcf1b" stroke="#111" stroke-width="2.5" stroke-linejoin="round"/>',
+    align:'<rect x="9" y="6" width="8" height="14" rx="2" fill="#ffcf1b" stroke="#111" stroke-width="3"/><rect x="27" y="24" width="8" height="14" rx="2" fill="#ffcf1b" stroke="#111" stroke-width="3"/><path d="M13 22v18M31 4v18" stroke="#e3241b" stroke-width="2.5" stroke-dasharray="3 3"/>',
+    patch:'<circle cx="22" cy="22" r="18" fill="none" stroke="#111" stroke-width="6"/><path d="M30 6l-8 14" stroke="#e3241b" stroke-width="3.5" stroke-linecap="round"/><circle cx="31" cy="5" r="3" fill="#e3241b"/>',
+    quote:'<rect x="7" y="5" width="30" height="34" rx="4" fill="#ffcf1b" stroke="#111" stroke-width="3"/><path d="M13 15h18M13 22h18M13 29h10" stroke="#111" stroke-width="3" stroke-linecap="round"/>'
+  };
+  const S = [
+    ['tyre','Vendita pneumatici','Gomme nuove per auto dei principali marchi, nella tua misura. Montaggio ed equilibratura sul posto.',1],
+    ['rim','Vendita cerchi','Cerchi in lega nuovi e usati ricondizionati in ottimo stato, pronti con le gomme montate.',1],
+    ['swap','Montaggio e smontaggio','Montiamo le gomme sul cerchio e la ruota sull’auto.'],
+    ['season','Cambio stagionale','Passaggio da gomme estive a invernali e viceversa.'],
+    ['bal','Equilibratura','Ruote bilanciate: niente vibrazioni al volante.'],
+    ['align','Convergenza','Ruote in linea: l’auto va dritta e le gomme durano di più.'],
+    ['patch','Riparazione forature','Ripariamo la foratura quando la gomma si può salvare, e ti diciamo onestamente quando invece va cambiata.',2],
+    ['quote','Preventivi su misura','Mandaci la misura o il modello dell’auto e ti rispondiamo col prezzo.',2]
+  ];
+  const wa = t => 'https://wa.me/393270107728?text=' + encodeURIComponent('Ciao Pronto Gomme, mi serve: ' + t);
+  document.getElementById('svc').innerHTML = S.map(([i,t,d,big]) => `<a class="${big === 1 ? 'big' : big === 2 ? 'wide' : ''}" href="${wa(t)}" target="_blank" rel="noopener"><span class="ico"><svg viewBox="0 0 44 44" aria-hidden="true">${I[i]}</svg></span><h3>${t}</h3><p>${d}</p><span class="more">Chiedi su WhatsApp →</span></a>`).join('');
+  const RIMS = [
+    ['%%RIM1%%','Multirazze intrecciato','Nero opaco','Tante razze sottili incrociate: sportivo e leggero alla vista.'],
+    ['%%RIM2%%','5 doppie razze a V','Nero lucido','Linee tese e nero specchiato, per un look pulito e aggressivo.'],
+    ['%%RIM3%%','Razze a Y','Antracite diamantato','Facce lucidate a specchio su fondo scuro: il classico bicolore.'],
+    ['%%RIM4%%','5 razze a V aperte','Nero diamantato','Contrasto forte tra nero e alluminio, molto sportivo.'],
+    ['%%RIM5%%','10 razze','Grafite','Disegno elegante e senza tempo, sta bene su ogni auto.']
+  ];
+  document.getElementById('rail').innerHTML = RIMS.map(([src,n,f,d]) => `<article class="rimcard"><div class="stage"><div class="spin"><img src="${src}" alt="Cerchio ${n}, ${f}" width="640" height="640" loading="lazy" draggable="false"></div></div><span class="tag">${f}</span><h3>${n}</h3><p>${d}</p><a class="btn b-k" href="${'https://wa.me/393270107728?text=' + encodeURIComponent('Ciao Pronto Gomme, ho visto sul sito il cerchio ' + n + ' ' + f.toLowerCase() + '. Che misure e prezzi avete per la mia auto?')}" target="_blank" rel="noopener">Chiedi disponibilità</a></article>`).join('');
+}
+</script>
+<script>%%SCRIPT%%</script>
+</body>
+</html>
