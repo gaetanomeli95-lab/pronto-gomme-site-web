@@ -320,12 +320,20 @@ footer b{color:var(--y);font-stretch:125%;font-weight:900}
   .strip>*{min-height:0}
   .hero .wrap{row-gap:24px}
   .scene{min-height:auto;padding:0 0 56px;align-items:start}
-  .scene::before{content:"";display:block;height:min(56svh,88vw)}
-  .has3d .scene::before{height:min(52svh,92vw)}
-  .no3d .scene::before{height:24px}
+  /* telefono: la ruota 3D vive solo nella prima schermata e scorre via con lei */
+  :root{--wh:min(50svh,90vw)}
+  #scene{position:absolute;top:58px;left:0;right:0;bottom:auto;height:var(--wh)}
+  .scene{padding-top:64px}
+  .scene::before{content:none}
+  .hero::before{content:"";display:block;height:calc(var(--wh) + 58px)}
+  .no3d .hero::before{height:88px}
+  .navbar,.quick{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+  .navbar{background:rgba(255,255,255,.96)}
+  .quick{background:rgba(17,17,17,.96)!important}
+  .scene[data-side] .copy{border-radius:0}
   .scene .wrap{grid-template-columns:minmax(0,1fr)}
   .scene[data-side=right] .copy{grid-column:1}
-  .copy{background:inherit;border-radius:22px 22px 0 0;padding-top:20px}
+  .copy{padding-top:0}
   .y .copy{background:var(--y)}.w .copy{background:var(--w)}.k .copy{background:var(--k)}
   .hero{padding:0 0 28px}
   .chips{grid-template-columns:minmax(0,1fr)}

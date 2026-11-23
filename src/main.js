@@ -247,6 +247,9 @@ function readouts(wear, bal, toeAmt) {
   });
 }
 
+// i numeri e le grafiche delle sezioni seguono lo scroll, con o senza 3D
+gsap.ticker.add(() => readouts(inner.wearUser ?? inner.wear, inner.bal, 0.2 * (1 - inner.toe)));
+
 /* ---------- 3D ---------- */
 let gpuFailed = false;
 addEventListener('unhandledrejection', e => { if (gpuFailed && /popErrorScope|Device|GPU/i.test(String(e.reason && e.reason.message || e.reason))) e.preventDefault(); });
@@ -351,10 +354,11 @@ async function start3D(forceWebGL = false) {
     });
   }
 
-  let vw = 1, vh = 1, mobile = false;
+  let vw = 1, vh = 1, mobile = false, onScreen = true;
+  new IntersectionObserver(es => { onScreen = es[0].isIntersecting; }).observe(canvas);
   function resize() {
     vw = canvas.clientWidth || innerWidth; vh = canvas.clientHeight || innerHeight; mobile = vw < 900;
-    renderer.setPixelRatio(Math.min(devicePixelRatio, mobile ? 1.5 : 2));
+    renderer.setPixelRatio(Math.min(devicePixelRatio, mobile ? 1.35 : 2));
     renderer.setSize(vw, vh, false);
     camera.aspect = vw / vh;
     camera.updateProjectionMatrix();
@@ -392,14 +396,13 @@ async function start3D(forceWebGL = false) {
     let x, y, s;
     const off = Math.abs(state.x) > 1;
     if (mobile) {
-      x = off ? state.x * HW : 0;
-      y = H * 0.5;
-      s = state.s * Math.min(1, HW * 0.7, H * 0.5) * 0.86;
+      x = 0; y = -H * 0.02;
+      s = Math.min(HW, H) * 0.86 * (state.s / SCENES.hero.s) ** 0.5;
     } else {
       x = state.x * HW; y = state.y * H; s = state.s * Math.min(1, H * 0.62);
     }
     x -= state.intro * HW * 1.9;
-    const hidden = Math.abs(x) - s * 1.2 > HW;
+    const hidden = !onScreen || (!mobile && Math.abs(x) - s * 1.2 > HW);
     if (hidden && wasHidden) { prevX = x; return; }
     wasHidden = hidden;
 
@@ -415,7 +418,6 @@ async function start3D(forceWebGL = false) {
 
     const wob = reduce ? 0 : balMix * (1 - inner.bal);
     const toeAmt = state.toeMix * 0.2 * (1 - inner.toe);
-    readouts(wear, inner.bal, toeAmt + (1 - state.toeMix) * 0.2);
 
     const yaw = state.yaw + mouse.sx * 0.22 * (1 - state.toeMix) + toeAmt;
     const pitch = state.pitch + mouse.sy * 0.12;
@@ -459,8 +461,6 @@ function no3D(err) {
   console.warn('3D non disponibile:', err);
   document.documentElement.classList.remove('has3d');
   document.documentElement.classList.add('no3d');
-  // senza 3D i numeri seguono comunque lo scroll
-  gsap.ticker.add(() => readouts(inner.wearUser ?? inner.wear, inner.bal, 0.2 * (1 - inner.toe)));
 }
 /* ---------- ingresso: il manometro gonfia la gomma, poi si apre la pagina ---------- */
 const intro = $('#intro');
@@ -472,35 +472,39 @@ function drawMano() {
   psi.textContent = (mano.p * 4).toFixed(1).replace('.', ',');
 }
 const t0 = performance.now();
-const pre = reduce || !intro ? null : gsap.to(mano, { p: 0.4, duration: 1.1, ease: 'power2.out', onUpdate: drawMano });
+let seen = false;
+try { seen = sessionStorage.getItem('pg-intro') === '1'; sessionStorage.setItem('pg-intro', '1'); } catch (e) {}
+if (seen && intro) { intro.remove(); lenis && lenis.start(); }
+const pre = reduce || seen || !intro ? null : gsap.to(mano, { p: 0.45, duration: 0.6, ease: 'power2.out', onUpdate: drawMano });
 let revealed = false;
 function startShow() {
   document.documentElement.classList.add('go');
   if (reduce) { state.intro = 0; return; }
-  gsap.to(state, { intro: 0, duration: 1.9, ease: 'power3.out' });
-  gsap.to('.hero .copy > *', { y: 0, opacity: 1, duration: 1, stagger: 0.08, ease: 'power3.out', clearProps: 'transform,opacity' });
-  gsap.to('.strip > *', { y: 0, opacity: 1, duration: 0.9, stagger: 0.08, delay: 0.35, ease: 'power3.out', clearProps: 'transform,opacity' });
-  gsap.to('.navbar', { y: 0, opacity: 1, duration: 0.9, delay: 0.2, ease: 'power3.out', clearProps: 'transform,opacity' });
-  gsap.fromTo('#hud', { opacity: 0 }, { opacity: 1, duration: 0.6, delay: 1.5 });
+  gsap.to(state, { intro: 0, duration: 1.3, ease: 'power3.out' });
+  if (seen) return;
+  gsap.to('.hero .copy > *', { y: 0, opacity: 1, duration: 0.7, stagger: 0.05, ease: 'power3.out', clearProps: 'transform,opacity' });
+  gsap.to('.strip > *', { y: 0, opacity: 1, duration: 0.6, stagger: 0.05, delay: 0.2, ease: 'power3.out', clearProps: 'transform,opacity' });
+  gsap.to('.navbar', { y: 0, opacity: 1, duration: 0.6, delay: 0.1, ease: 'power3.out', clearProps: 'transform,opacity' });
+  gsap.fromTo('#hud', { opacity: 0 }, { opacity: 1, duration: 0.5, delay: 1 });
 }
 function reveal() {
   if (revealed) return;
   revealed = true;
-  if (reduce || !intro) { intro && intro.remove(); lenis && lenis.start(); startShow(); return; }
-  const wait = Math.max(0, 1000 - (performance.now() - t0)) / 1000;
+  if (reduce || seen || !intro) { if (!seen && intro) intro.remove(); lenis && lenis.start(); startShow(); return; }
+  const wait = Math.max(0, 450 - (performance.now() - t0)) / 1000;
   const maxR = Math.hypot(innerWidth, innerHeight);
   gsap.set('.hero .copy > *', { y: 34, opacity: 0 });
   gsap.set('.strip > *', { y: 24, opacity: 0 });
   gsap.set('.navbar', { y: -30, opacity: 0 });
   gsap.timeline({ delay: wait })
     .add(() => pre && pre.kill())
-    .to(mano, { p: 0.575, duration: 0.7, ease: 'back.out(1.7)', onUpdate: drawMano })
+    .to(mano, { p: 0.575, duration: 0.4, ease: 'back.out(1.7)', onUpdate: drawMano })
     .add(() => { intro.classList.add('ok'); $('#mano-txt').textContent = 'Pressione giusta, partiamo!'; })
-    .to(intro, { '--r': maxR + 'px', duration: 1.05, ease: 'power3.inOut' }, '+=0.3')
-    .add(startShow, '-=0.7')
+    .to(intro, { '--r': maxR + 'px', duration: 0.7, ease: 'power3.inOut' }, '+=0.12')
+    .add(startShow, '-=0.5')
     .add(() => { intro.remove(); lenis && lenis.start(); ScrollTrigger.refresh(); });
 }
 history.scrollRestoration = 'manual';
 scrollTo(0, 0);
-setTimeout(reveal, 5000);
+setTimeout(reveal, 3500);
 start3D().then(reveal).catch(err => { no3D(err); reveal(); });
